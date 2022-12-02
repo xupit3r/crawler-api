@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { CooldownHost, Link, Page, ToBeVisited } from './types';
 
 const logger = debug('db');
 
