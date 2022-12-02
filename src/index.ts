@@ -1,7 +1,10 @@
 import Koa from 'koa';
 import Router from '@koa/router';
+import * as dotenv from 'dotenv';
 import debug from 'debug';
 import { useDb } from './lib/db';
+
+dotenv.config();
 
 const logger = debug('server');
 
@@ -35,4 +38,5 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes());
 
-app.listen(3000);
+app.listen(process.env.LISTEN_PORT);
+logger(`listening on ${process.env.LISTEN_PORT}`)
