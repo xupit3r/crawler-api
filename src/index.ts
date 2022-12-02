@@ -25,6 +25,10 @@ router.get('/counts', async ctx => {
   };
 });
 
+router.get('/hosts', async ctx => {
+  ctx.body = await ctx.db.getHosts();
+});
+
 // our entry point
 app.use(async (ctx, next) => {
   ctx.db = await useDb();

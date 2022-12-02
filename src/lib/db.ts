@@ -43,11 +43,16 @@ export const useDb = async () => {
   const getCooldownCount = async () => {
     return await cooldown.countDocuments();
   }
+
+  const getHosts = async () => {
+    return await pages.distinct('host');
+  }
   
   return {
     getPagesCount,
     getLinksCount,
     getQueueCount,
-    getCooldownCount
+    getCooldownCount,
+    getHosts
   }
 }
