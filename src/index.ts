@@ -1,9 +1,38 @@
 import Koa from 'koa';
+import Router from '@koa/router';
+import debug from 'debug';
+import { useDb } from './lib/db';
+
+const logger = debug('server');
 
 const app = new Koa();
+const router = new Router();
 
-app.use(async ctx => {
-  ctx.body = 'Hello, world';
+router.get('/counts', async ctx => {
+  const pages = await ctx.db.getPagesCount();
+  const links = await ctx.db.getLinksCount();
+  const queue = await ctx.db.getQueueCount();
+  const cooldown = await ctx.db.getCooldownCount();
+
+  ctx.body = {
+    pages,
+    links,
+    queue,
+    cooldown
+  };
 });
+
+// our entry point
+app.use(async (ctx, next) => {
+  ctx.db = await useDb();
+  
+  const start = Date.now();
+  await next();
+  const total = Date.now() - start;
+
+  logger(`${ctx.request.method} request to ${ctx._matchedRoute} took ${total}ms`);
+});
+
+app.use(router.routes());
 
 app.listen(3000);
