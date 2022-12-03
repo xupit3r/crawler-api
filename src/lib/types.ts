@@ -31,3 +31,7 @@ export type LinkLookup = {
 export type Unqiues = {
   [key: string]: boolean
 }
+
+export type Counts = {
+  [key: string]: number
+}

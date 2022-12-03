@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { Link, LinkLookup, Unqiues } from './types';
+import { Counts, Link, LinkLookup, Page, Unqiues } from './types';
 
 const logger = debug('db');
 
@@ -45,6 +45,11 @@ export const useDb = async () => {
     return await cooldown.countDocuments();
   }
 
+  const getSiteCounts = async () => {
+    const hosts = await pages.distinct('host');
+    return hosts.length;
+  }
+
   const getPageListings = async () => {
     const pageDocs = await pages.find().project({
       url: 1,
@@ -54,6 +59,7 @@ export const useDb = async () => {
 
     const linkDocs = await links.find().project({
       source: 1,
+      host: 1,
       sourceHost: 1
     }).toArray();
 
@@ -92,11 +98,32 @@ export const useDb = async () => {
           }
         }
       };
-    });
+    }).sort((a, b) => b.counts.links - a.counts.links);
   }
 
-  const getHosts = async () => {
-    return await pages.distinct('host');
+  const getSiteListings = async () => {
+    const hostDocs = await pages.distinct('host');
+    const pageDocs = await pages.find().project({
+      host: 1
+    }).toArray();
+
+    const pageCounts: Counts = pageDocs.reduce((c: Counts, doc) => {
+      if (!c[doc.host]) {
+        c[doc.host] = 0;
+      }
+
+      c[doc.host]++;
+
+      return c;
+    }, {});
+
+
+    return hostDocs.filter(host => host.length).map(host => ({
+      name: host,
+      counts: {
+        pages: pageCounts[host]
+      }
+    })).sort((a, b) => b.counts.pages - a.counts.pages);
   }
 
   const getLinkCountsForHost = async (host: string) => {
@@ -116,11 +143,12 @@ export const useDb = async () => {
   
   return {
     getPagesCount,
+    getSiteCounts,
     getLinksCount,
     getQueueCount,
     getCooldownCount,
     getPageListings,
-    getHosts,
+    getSiteListings,
     getLinkCountsForHost,
     getLinksForHost
   }

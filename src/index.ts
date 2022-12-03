@@ -16,15 +16,15 @@ router.get('/counts', async ctx => {
   const links = await ctx.db.getLinksCount();
   const queue = await ctx.db.getQueueCount();
   const cooldown = await ctx.db.getCooldownCount();
-  const hosts = await ctx.db.getHosts();
+  const sites = await ctx.db.getSiteCounts();
 
   ctx.body = [{
+    name: 'sites',
+    value: sites
+  }, {
     name: 'pages',
     value: pages
-  }, {
-    name: 'sites visited',
-    value: hosts.length
-  }, {
+  },{
     name: 'links',
     value: links
   }, {
@@ -50,8 +50,8 @@ router.get('/pages', async ctx => {
   ctx.body = await ctx.db.getPageListings();
 });
 
-router.get('/hosts', async ctx => {
-  ctx.body = await ctx.db.getHosts();
+router.get('/sites', async ctx => {
+  ctx.body = await ctx.db.getSiteListings();
 });
 
 router.get('/links/:host', async ctx  => {
