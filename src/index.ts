@@ -22,7 +22,7 @@ router.get('/counts', async ctx => {
     name: 'pages',
     value: pages
   }, {
-    name: 'hosts visited',
+    name: 'sites visited',
     value: hosts.length
   }, {
     name: 'links',
