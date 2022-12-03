@@ -17,12 +17,19 @@ router.get('/counts', async ctx => {
   const queue = await ctx.db.getQueueCount();
   const cooldown = await ctx.db.getCooldownCount();
 
-  ctx.body = {
-    pages,
-    links,
-    queue,
-    cooldown
-  };
+  ctx.body = [{
+    name: 'pages',
+    value: pages
+  }, {
+    name: 'links',
+    value: links
+  }, {
+    name: 'queue',
+    value: queue
+  }, {
+    name: 'cooldown',
+    value: cooldown
+  }];
 });
 
 router.get('/counts/:host', async ctx => {
