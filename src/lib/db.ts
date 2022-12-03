@@ -88,7 +88,7 @@ export const useDb = async () => {
         ...{
           counts: {
             links: pageLinks.length,
-            uniqueHosts: uniqueHosts.length
+            hosts: uniqueHosts.length
           }
         }
       };
