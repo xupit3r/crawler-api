@@ -23,3 +23,11 @@ export type CooldownHost = {
   expireAt: Date
   hostname: string
 }
+
+export type LinkLookup = {
+  [host: string]: Array<Link>
+}
+
+export type Unqiues = {
+  [key: string]: boolean
+}

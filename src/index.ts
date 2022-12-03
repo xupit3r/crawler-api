@@ -35,6 +35,10 @@ router.get('/counts/:host', async ctx => {
   };
 });
 
+router.get('/pages', async ctx => {
+  ctx.body = await ctx.db.getPageListings();
+});
+
 router.get('/hosts', async ctx => {
   ctx.body = await ctx.db.getHosts();
 });

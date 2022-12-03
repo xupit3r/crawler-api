@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import { MongoClient } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
+import { Link, LinkLookup, Unqiues } from './types';
 
 const logger = debug('db');
 
@@ -44,6 +45,56 @@ export const useDb = async () => {
     return await cooldown.countDocuments();
   }
 
+  const getPageListings = async () => {
+    const pageDocs = await pages.find().project({
+      url: 1,
+      host: 1,
+      status: 1
+    }).toArray();
+
+    const linkDocs = await links.find().project({
+      source: 1,
+      sourceHost: 1
+    }).toArray();
+
+    const lookup: LinkLookup = linkDocs.reduce((lk: LinkLookup, doc) => {
+      if (!lk[doc.source]) {
+        lk[doc.source] = [];
+      }
+
+      lk[doc.source].push({
+        url: doc.url,
+        host: doc.host,
+        source: doc.source,
+        sourceHost: doc.soureHost
+      });
+
+      return lk;
+    }, {});
+
+    return pageDocs.map(page => {
+      const pageLinks = (typeof lookup[page.url] !== 'undefined'
+        ? lookup[page.url]
+        : []
+      );
+
+      const uniqueHosts = Object.keys(pageLinks.reduce((h: Unqiues, link: Link) => {
+        h[link.host] = true;
+        return h;
+      }, {}));
+
+      return {
+        ...page,
+        ...{
+          counts: {
+            links: pageLinks.length,
+            uniqueHosts: uniqueHosts.length
+          }
+        }
+      };
+    });
+  }
+
   const getHosts = async () => {
     return await pages.distinct('host');
   }
@@ -68,6 +119,7 @@ export const useDb = async () => {
     getLinksCount,
     getQueueCount,
     getCooldownCount,
+    getPageListings,
     getHosts,
     getLinkCountsForHost,
     getLinksForHost
