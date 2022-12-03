@@ -25,8 +25,22 @@ router.get('/counts', async ctx => {
   };
 });
 
+router.get('/counts/:host', async ctx => {
+  const linkCounts = await ctx.db.getLinkCountsForHost(ctx.params.host);
+
+  ctx.body = {
+    counts: {
+      links: linkCounts
+    }
+  };
+});
+
 router.get('/hosts', async ctx => {
   ctx.body = await ctx.db.getHosts();
+});
+
+router.get('/links/:host', async ctx  => {
+  ctx.body = await ctx.db.getLinksForHost(ctx.params.host);
 });
 
 // our entry point

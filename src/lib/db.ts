@@ -47,12 +47,29 @@ export const useDb = async () => {
   const getHosts = async () => {
     return await pages.distinct('host');
   }
+
+  const getLinkCountsForHost = async (host: string) => {
+    return await links.countDocuments({
+      host: host
+    });
+  }
+
+  const getLinksForHost = async (host: string) => {
+    return await links.find({
+      host: host
+    }).project({
+      url: 1,
+      source: 1
+    }).toArray();
+  }
   
   return {
     getPagesCount,
     getLinksCount,
     getQueueCount,
     getCooldownCount,
-    getHosts
+    getHosts,
+    getLinkCountsForHost,
+    getLinksForHost
   }
 }
