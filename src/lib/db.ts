@@ -153,11 +153,17 @@ export const useDb = async () => {
       query = {};
     }
 
-    return await queue.find(query, { sort: { _id: 1 }}).project({
+    const docs = await queue.find(query, { sort: { _id: 1 }}).project({
       url: 1,
       date: 1,
       processing: 1
     }).limit(num).toArray();
+
+    return docs.map(doc => ({
+      url: doc.url,
+      date: doc.date,
+      processing: doc.processing ? true : false
+    }));
   }
   
   return {
