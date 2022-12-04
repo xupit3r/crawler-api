@@ -21,6 +21,7 @@ export type ToBeVisited = {
 
 export type QueueItem = {
   url: string
+  processing: boolean
   date: Date
 }
 

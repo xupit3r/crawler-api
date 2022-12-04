@@ -142,9 +142,21 @@ export const useDb = async () => {
   }
 
   const getUpNext = async (num: number = 50) => {
-    return await queue.find({}).project({
+    const cooldownHosts = await cooldown.distinct('hostname');
+
+    let query = {};
+    if (cooldownHosts.length > 0) {
+      query = {
+        host: { $nin: cooldownHosts }
+      };
+    } else {
+      query = {};
+    }
+
+    return await queue.find(query, { sort: { _id: 1 }}).project({
       url: 1,
-      date: 1
+      date: 1,
+      processing: 1
     }).limit(num).toArray();
   }
   
