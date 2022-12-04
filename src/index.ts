@@ -36,6 +36,10 @@ router.get('/counts', async ctx => {
   }];
 });
 
+router.get('/next/:number', async ctx => {
+  ctx.body = await ctx.db.getUpNext(+ctx.params.number);
+});
+
 router.get('/counts/:host', async ctx => {
   const linkCounts = await ctx.db.getLinkCountsForHost(ctx.params.host);
 

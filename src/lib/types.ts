@@ -19,6 +19,11 @@ export type ToBeVisited = {
   date: Date
 }
 
+export type QueueItem = {
+  url: string
+  date: Date
+}
+
 export type CooldownHost = {
   expireAt: Date
   hostname: string

@@ -140,6 +140,13 @@ export const useDb = async () => {
       source: 1
     }).toArray();
   }
+
+  const getUpNext = async (num: number = 50) => {
+    return await queue.find({}).project({
+      url: 1,
+      date: 1
+    }).limit(num).toArray();
+  }
   
   return {
     getPagesCount,
@@ -150,6 +157,7 @@ export const useDb = async () => {
     getPageListings,
     getSiteListings,
     getLinkCountsForHost,
-    getLinksForHost
+    getLinksForHost,
+    getUpNext
   }
 }
