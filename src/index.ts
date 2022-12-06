@@ -62,6 +62,10 @@ router.get('/links/:host', async ctx  => {
   ctx.body = await ctx.db.getLinksForHost(ctx.params.host);
 });
 
+router.get('/cooldown', async ctx => {
+  ctx.body = await ctx.db.getCooldown();
+});
+
 // our entry point
 app.use(async (ctx, next) => {
   ctx.db = await useDb();

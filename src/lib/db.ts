@@ -154,16 +154,22 @@ export const useDb = async () => {
     }
 
     const docs = await queue.find(query, { sort: { _id: 1 }}).project({
+      _id: 1,
       url: 1,
       date: 1,
       processing: 1
     }).limit(num).toArray();
 
     return docs.map(doc => ({
+      _id: doc._id,
       url: doc.url,
       date: doc.date,
       processing: doc.processing ? true : false
     }));
+  }
+
+  const getCooldown = async () => {
+    return await cooldown.find({}).toArray();
   }
   
   return {
@@ -176,6 +182,7 @@ export const useDb = async () => {
     getSiteListings,
     getLinkCountsForHost,
     getLinksForHost,
-    getUpNext
+    getUpNext,
+    getCooldown
   }
 }
