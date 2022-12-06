@@ -30,19 +30,19 @@ export const useDb = async () => {
   const cooldown = db.collection('cooldown');
 
   const getPagesCount = async () => {
-    return await pages.countDocuments();
+    return await pages.estimatedDocumentCount();
   }
 
   const getLinksCount = async () => {
-    return await links.countDocuments();
+    return await links.estimatedDocumentCount();
   }
 
   const getQueueCount = async () => {
-    return await queue.countDocuments();
+    return await queue.estimatedDocumentCount();
   }
 
   const getCooldownCount = async () => {
-    return await cooldown.countDocuments();
+    return await cooldown.estimatedDocumentCount();
   }
 
   const getSiteCounts = async () => {
