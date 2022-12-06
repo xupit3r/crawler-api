@@ -12,11 +12,19 @@ const app = new Koa();
 const router = new Router();
 
 router.get('/counts', async ctx => {
-  const pages = await ctx.db.getPagesCount();
-  const links = await ctx.db.getLinksCount();
-  const queue = await ctx.db.getQueueCount();
-  const cooldown = await ctx.db.getCooldownCount();
-  const sites = await ctx.db.getSiteCounts();
+  const [
+    pages,
+    links, 
+    queue, 
+    cooldown, 
+    sites
+  ] = await Promise.all([
+    ctx.db.getPagesCount(),
+    ctx.db.getLinksCount(),
+    ctx.db.getQueueCount(),
+    ctx.db.getCooldownCount(),
+    ctx.db.getSiteCounts()
+  ]);
 
   ctx.body = [{
     name: 'sites',
