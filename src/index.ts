@@ -12,9 +12,9 @@ const logger = debug('server');
 const app = new Koa();
 const router = new Router();
 
-let WSS_PORT = 4000;
-if (typeof process.env.WSS_PORT === 'number') {
-  WSS_PORT = process.env.WSS_PORT;
+let WSS_PORT: number = 4000;
+if (typeof process.env.WSS_PORT !== 'undefined') {
+  WSS_PORT = Number.parseInt(process.env.WSS_PORT);
 } else {
   logger(`.env does not contain a WSS_PORT entry, defaulting to ${WSS_PORT}`)
 }
