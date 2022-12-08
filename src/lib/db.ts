@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv';
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { Counts, Link, LinkLookup, Page, Unqiues } from './types';
+import { Counts, Link, LinkLookup, Page, Site, Unqiues } from './types';
+import { url } from '@koa/router';
 
 const logger = debug('db');
 
@@ -33,10 +34,6 @@ export const useDb = async () => {
     return await pages.estimatedDocumentCount();
   }
 
-  const getLinksCount = async () => {
-    return await links.estimatedDocumentCount();
-  }
-
   const getQueueCount = async () => {
     return await queue.estimatedDocumentCount();
   }
@@ -51,13 +48,18 @@ export const useDb = async () => {
   }
 
   const getPageListings = async () => {
-    const pageDocs = await pages.find().project({
+    const pageDocs = await pages.find().limit(500).project({
+      _id: 1,
       url: 1,
       host: 1,
       status: 1
     }).toArray();
 
-    const linkDocs = await links.find().project({
+    const linkDocs = await links.find({
+      source: {
+        $in: pageDocs.map(doc => doc.url)
+      }
+    }).project({
       source: 1,
       host: 1,
       sourceHost: 1
@@ -101,44 +103,39 @@ export const useDb = async () => {
     }).sort((a, b) => b.counts.links - a.counts.links);
   }
 
+  const searchPages = async (search: string) => {
+    return await pages.find({ 
+      $text: { $search: search } 
+    }).sort({ 
+      score: { $meta: "textScore" } 
+    }).limit(50).project({
+      _id: 1,
+      url: 1,
+      score: { $meta: "textScore" }
+    }).toArray();
+  }
+
+  const getPage = async (pageId: string) => {
+    return await pages.findOne({
+      _id: new ObjectId(pageId)
+    });
+  };
+
   const getSiteListings = async () => {
     const hostDocs = await pages.distinct('host');
-    const pageDocs = await pages.find().project({
-      host: 1
-    }).toArray();
+    const sites: Array<Site> = hostDocs.filter(host => host.length).map(host => ({
+      name: host
+    }));
 
-    const pageCounts: Counts = pageDocs.reduce((c: Counts, doc) => {
-      if (!c[doc.host]) {
-        c[doc.host] = 0;
+    return sites.sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      } else if (a.name > b.name) {
+        return 1;
       }
 
-      c[doc.host]++;
-
-      return c;
-    }, {});
-
-
-    return hostDocs.filter(host => host.length).map(host => ({
-      name: host,
-      counts: {
-        pages: pageCounts[host]
-      }
-    })).sort((a, b) => b.counts.pages - a.counts.pages);
-  }
-
-  const getLinkCountsForHost = async (host: string) => {
-    return await links.countDocuments({
-      host: host
+      return 0
     });
-  }
-
-  const getLinksForHost = async (host: string) => {
-    return await links.find({
-      host: host
-    }).project({
-      url: 1,
-      source: 1
-    }).toArray();
   }
 
   const getUpNext = async (num: number = 50) => {
@@ -175,13 +172,12 @@ export const useDb = async () => {
   return {
     getPagesCount,
     getSiteCounts,
-    getLinksCount,
     getQueueCount,
     getCooldownCount,
     getPageListings,
+    searchPages,
+    getPage,
     getSiteListings,
-    getLinkCountsForHost,
-    getLinksForHost,
     getUpNext,
     getCooldown
   }

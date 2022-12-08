@@ -14,13 +14,11 @@ const router = new Router();
 router.get('/counts', async ctx => {
   const [
     pages,
-    links, 
     queue, 
     cooldown, 
     sites
   ] = await Promise.all([
     ctx.db.getPagesCount(),
-    ctx.db.getLinksCount(),
     ctx.db.getQueueCount(),
     ctx.db.getCooldownCount(),
     ctx.db.getSiteCounts()
@@ -32,9 +30,6 @@ router.get('/counts', async ctx => {
   }, {
     name: 'pages',
     value: pages
-  },{
-    name: 'links',
-    value: links
   }, {
     name: 'queue',
     value: queue
@@ -48,26 +43,20 @@ router.get('/next/:number', async ctx => {
   ctx.body = await ctx.db.getUpNext(+ctx.params.number);
 });
 
-router.get('/counts/:host', async ctx => {
-  const linkCounts = await ctx.db.getLinkCountsForHost(ctx.params.host);
-
-  ctx.body = {
-    counts: {
-      links: linkCounts
-    }
-  };
-});
-
 router.get('/pages', async ctx => {
   ctx.body = await ctx.db.getPageListings();
 });
 
-router.get('/sites', async ctx => {
-  ctx.body = await ctx.db.getSiteListings();
+router.get('/pages/search', async ctx => {
+  ctx.body = await ctx.db.searchPages(ctx.query.search);
+})
+
+router.get('/pages/byid/:pageId', async ctx => {
+  ctx.body = await ctx.db.getPage(ctx.params.pageId);
 });
 
-router.get('/links/:host', async ctx  => {
-  ctx.body = await ctx.db.getLinksForHost(ctx.params.host);
+router.get('/sites', async ctx => {
+  ctx.body = await ctx.db.getSiteListings();
 });
 
 router.get('/cooldown', async ctx => {
