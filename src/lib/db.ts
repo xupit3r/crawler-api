@@ -52,55 +52,11 @@ export const useDb = async () => {
       _id: 1,
       url: 1,
       host: 1,
-      status: 1
+      status: 1,
+      links: 1
     }).toArray();
 
-    const linkDocs = await links.find({
-      source: {
-        $in: pageDocs.map(doc => doc.url)
-      }
-    }).project({
-      source: 1,
-      host: 1,
-      sourceHost: 1
-    }).toArray();
-
-    const lookup: LinkLookup = linkDocs.reduce((lk: LinkLookup, doc) => {
-      if (!lk[doc.source]) {
-        lk[doc.source] = [];
-      }
-
-      lk[doc.source].push({
-        url: doc.url,
-        host: doc.host,
-        source: doc.source,
-        sourceHost: doc.soureHost
-      });
-
-      return lk;
-    }, {});
-
-    return pageDocs.map(page => {
-      const pageLinks = (typeof lookup[page.url] !== 'undefined'
-        ? lookup[page.url]
-        : []
-      );
-
-      const uniqueHosts = Object.keys(pageLinks.reduce((h: Unqiues, link: Link) => {
-        h[link.host] = true;
-        return h;
-      }, {}));
-
-      return {
-        ...page,
-        ...{
-          counts: {
-            links: pageLinks.length,
-            hosts: uniqueHosts.length
-          }
-        }
-      };
-    }).sort((a, b) => b.counts.links - a.counts.links);
+    return pageDocs.sort((a, b) => b.links.length - a.links.length);
   }
 
   const searchPages = async (search: string) => {
@@ -168,6 +124,7 @@ export const useDb = async () => {
   const getCooldown = async () => {
     return await cooldown.find({}).toArray();
   }
+  
   
   return {
     getPagesCount,

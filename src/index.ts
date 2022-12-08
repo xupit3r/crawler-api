@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import Router from '@koa/router';
+import { WebSocketServer } from 'ws';
 import * as dotenv from 'dotenv';
 import debug from 'debug';
 import { useDb } from './lib/db';
@@ -10,6 +11,77 @@ const logger = debug('server');
 
 const app = new Koa();
 const router = new Router();
+
+let WSS_PORT = 4000;
+if (typeof process.env.WSS_PORT === 'number') {
+  WSS_PORT = process.env.WSS_PORT;
+} else {
+  logger(`.env does not contain a WSS_PORT entry, defaulting to ${WSS_PORT}`)
+}
+
+const wss = new WebSocketServer({
+  port: WSS_PORT
+}, () => logger(`wss listening on port ${WSS_PORT}`));
+
+wss.on('connection', (ws) => {
+  ws.on('message', (data, isBinary) => {
+    if (!isBinary) {
+      logger(`wss received message ${data}`);
+    } else {
+      logger(`wss received a binary message`);
+    }
+  });
+
+  logger(`ws client connected`);
+});
+
+const socketDumps = async () => {
+  const db = await useDb();
+
+  setInterval(async () => {
+    const [
+      pages,
+      queue, 
+      cooldown, 
+      sites,
+      upNext,
+      cooldownHosts
+    ] = await Promise.all([
+      db.getPagesCount(),
+      db.getQueueCount(),
+      db.getCooldownCount(),
+      db.getSiteCounts(),
+      db.getUpNext(10),
+      db.getCooldown()
+    ]);
+  
+    const counts = [{
+      name: 'sites',
+      value: sites
+    }, {
+      name: 'pages',
+      value: pages
+    }, {
+      name: 'queue',
+      value: queue
+    }, {
+      name: 'cooldown',
+      value: cooldown
+    }];
+
+
+
+    wss.clients.forEach(client => {
+      client.send(JSON.stringify({
+        type: 'dashboard',
+        counts: counts,
+        upNext: upNext,
+        cooldown: cooldownHosts
+      }));
+    })
+  }, 500);
+}
+
 
 router.get('/counts', async ctx => {
   const [
@@ -77,4 +149,6 @@ app.use(async (ctx, next) => {
 app.use(router.routes());
 
 app.listen(process.env.LISTEN_PORT);
-logger(`listening on ${process.env.LISTEN_PORT}`)
+logger(`listening on ${process.env.LISTEN_PORT}`);
+
+socketDumps();
