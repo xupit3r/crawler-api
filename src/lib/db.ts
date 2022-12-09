@@ -2,8 +2,7 @@ import * as dotenv from 'dotenv';
 import { MongoClient, ObjectId } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { Counts, Link, LinkLookup, Page, Site, Unqiues } from './types';
-import { url } from '@koa/router';
+import { Site } from './types';
 
 const logger = debug('db');
 
@@ -26,7 +25,6 @@ export const useDb = async () => {
 
   // collections that may be used
   const pages = db.collection('pages');
-  const links = db.collection('links');
   const queue = db.collection('queue');
   const cooldown = db.collection('cooldown');
 
