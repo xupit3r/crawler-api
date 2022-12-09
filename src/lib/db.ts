@@ -46,15 +46,11 @@ export const useDb = async () => {
   }
 
   const getPageListings = async () => {
-    const pageDocs = await pages.find().limit(500).project({
+    return await pages.find().project({
       _id: 1,
       url: 1,
-      host: 1,
-      status: 1,
-      links: 1
+      host: 1
     }).toArray();
-
-    return pageDocs.sort((a, b) => b.links.length - a.links.length);
   }
 
   const searchPages = async (search: string) => {
