@@ -6,6 +6,6 @@
   "ignore": [],
   "exec": "ts-node ./src/index.ts",
   "env": {
-    "DEBUG": "server,db"
+    "DEBUG": "server,wss,db"
   }
 }

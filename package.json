@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon",
-    "start:debug": "npm run build && DEBUG=server,db node build/index.js",
+    "start:debug": "npm run build && DEBUG=server,wss,db node build/index.js",
     "start": "npm run build && node build/index.js",
     "build": "rimraf ./build && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
