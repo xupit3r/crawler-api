@@ -27,6 +27,7 @@ export const useDb = async () => {
   const pages = db.collection('pages');
   const queue = db.collection('queue');
   const cooldown = db.collection('cooldown');
+  const text = db.collection('text');
 
   const getPagesCount = async () => {
     return await pages.estimatedDocumentCount();
@@ -58,6 +59,12 @@ export const useDb = async () => {
       _id: new ObjectId(pageId)
     });
   };
+
+  const getPageText = async (pageId: string) => {
+    return await text.find({
+      page: new ObjectId(pageId)
+    }).toArray();
+  }
 
   const getSiteListings = async () => {
     const hostDocs = await pages.distinct('host');
@@ -115,6 +122,7 @@ export const useDb = async () => {
     getCooldownCount,
     getPageListings,
     getPage,
+    getPageText,
     getSiteListings,
     getUpNext,
     getCooldown
