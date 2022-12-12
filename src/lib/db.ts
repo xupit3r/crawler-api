@@ -53,18 +53,6 @@ export const useDb = async () => {
     }).toArray();
   }
 
-  const searchPages = async (search: string) => {
-    return await pages.find({ 
-      $text: { $search: search } 
-    }).sort({ 
-      score: { $meta: "textScore" } 
-    }).limit(50).project({
-      _id: 1,
-      url: 1,
-      score: { $meta: "textScore" }
-    }).toArray();
-  }
-
   const getPage = async (pageId: string) => {
     return await pages.findOne({
       _id: new ObjectId(pageId)
@@ -126,7 +114,6 @@ export const useDb = async () => {
     getQueueCount,
     getCooldownCount,
     getPageListings,
-    searchPages,
     getPage,
     getSiteListings,
     getUpNext,

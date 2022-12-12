@@ -51,10 +51,6 @@ router.get('/pages', async ctx => {
   ctx.body = await ctx.db.getPageListings();
 });
 
-router.get('/pages/search', async ctx => {
-  ctx.body = await ctx.db.searchPages(ctx.query.search);
-})
-
 router.get('/pages/byid/:pageId', async ctx => {
   ctx.body = await ctx.db.getPage(ctx.params.pageId);
 });
