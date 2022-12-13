@@ -50,7 +50,7 @@ export const useDb = async () => {
     return await pages.find().project({
       _id: 1,
       url: 1,
-      host: 1
+      text: 1
     }).toArray();
   }
 
@@ -61,9 +61,15 @@ export const useDb = async () => {
   };
 
   const getPageText = async (pageId: string) => {
-    return await text.find({
+    const textDoc = await text.findOne({
       page: new ObjectId(pageId)
-    }).toArray();
+    });
+
+    if (textDoc !== null) {
+      return textDoc.text;
+    }
+
+    return [];
   }
 
   const getSiteListings = async () => {
