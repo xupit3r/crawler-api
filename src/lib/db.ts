@@ -66,10 +66,10 @@ export const useDb = async () => {
     });
 
     if (textDoc !== null) {
-      return textDoc.text;
+      return textDoc;
     }
 
-    return [];
+    return {};
   }
 
   const getSiteListings = async () => {
