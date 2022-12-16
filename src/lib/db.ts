@@ -50,7 +50,8 @@ export const useDb = async () => {
     return await pages.find().project({
       _id: 1,
       url: 1,
-      text: 1
+      summarized: 1,
+      sentiment: 1
     }).toArray();
   }
 
