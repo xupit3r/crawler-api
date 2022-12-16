@@ -47,8 +47,8 @@ router.get('/next/:number', async ctx => {
   ctx.body = await ctx.db.getUpNext(+ctx.params.number);
 });
 
-router.get('/pages', async ctx => {
-  ctx.body = await ctx.db.getPageListings();
+router.get('/pages/list/:limit', async ctx => {
+  ctx.body = await ctx.db.getPageListings(ctx.params.limit);
 });
 
 router.get('/pages/byid/:pageId', async ctx => {

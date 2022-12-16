@@ -46,13 +46,22 @@ export const useDb = async () => {
     return hosts.length;
   }
 
-  const getPageListings = async () => {
-    return await pages.find().project({
+  const getPageListings = async (limit: number = -1) => {
+    const cursor = await pages.find({
+      summarized: true,
+      sentiment: true
+    }).project({
       _id: 1,
       url: 1,
       summarized: 1,
       sentiment: 1
-    }).toArray();
+    });
+
+    if (limit !== -1) {
+      return cursor.limit(+limit).toArray();
+    }
+
+    return cursor.toArray();
   }
 
   const getPage = async (pageId: string) => {
