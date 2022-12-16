@@ -47,10 +47,7 @@ export const useDb = async () => {
   }
 
   const getPageListings = async (limit: number = -1) => {
-    const cursor = await pages.find({
-      summarized: true,
-      sentiment: true
-    }).project({
+    const cursor = await pages.find().project({
       _id: 1,
       url: 1,
       summarized: 1,
