@@ -67,6 +67,13 @@ export const useDb = async () => {
     });
   };
 
+  const getPageTexts = async () => {
+    return await text.find().project({
+      page: 1,
+      text: 1
+    }).toArray();
+  }
+
   const getPageText = async (pageId: string) => {
     const textDoc = await text.findOne({
       page: new ObjectId(pageId)
@@ -134,6 +141,7 @@ export const useDb = async () => {
     getQueueCount,
     getCooldownCount,
     getPageListings,
+    getPageTexts,
     getPage,
     getPageText,
     getSiteListings,

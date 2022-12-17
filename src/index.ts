@@ -55,9 +55,13 @@ router.get('/pages/byid/:pageId', async ctx => {
   ctx.body = await ctx.db.getPage(ctx.params.pageId);
 });
 
+router.get('/pages/texts', async ctx => {
+  ctx.body = await ctx.db.getPageTexts();
+});
+
 router.get('/pages/text/:pageId', async ctx => {
-  ctx.body = await ctx.db.getPageText(ctx.params.pageId)
-})
+  ctx.body = await ctx.db.getPageText(ctx.params.pageId);
+});
 
 router.get('/sites', async ctx => {
   ctx.body = await ctx.db.getSiteListings();
