@@ -33,7 +33,13 @@ wss.on('connection', (ws) => {
             type: 'page',
             page: doc
           }));
-        }).on('end', () => logger('PAGE -- done sending page data.'));;
+        }).on('end', () => {
+          logger('PAGE -- done sending page data.')
+          ws.send(JSON.stringify({
+            type: 'page',
+            done: true 
+          }));
+        });
       } else if (req.type === 'tf') {
         logger('TF -- sending tf info...');
         db.getPageTFStream().on('data', (doc) => {
@@ -41,7 +47,13 @@ wss.on('connection', (ws) => {
             type: 'tf',
             tf: doc
           }));
-        }).on('end', () => logger('TF -- done sending TF data.'));
+        }).on('end', () => {
+          logger('TF -- done sending TF data.')
+          ws.send(JSON.stringify({
+            type: 'tf',
+            done: true 
+          }));
+        });
       } else {
         logger(`didn't recognize request type ${req.type}`);
       }
