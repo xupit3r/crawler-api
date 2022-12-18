@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { MongoClient, ObjectId } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { Site } from './types';
+import { ObjectLookup, Site } from './types';
 
 const logger = debug('db');
 
@@ -63,11 +63,26 @@ export const useDb = async () => {
   }
 
   const getPagesByIds = async (ids: Array<string>) => {
-    return await pages.find({
+    const results = await pages.find({
       _id: {
         $in: ids.map(id => new ObjectId(id))
       }
+    }).project({
+      _id: 1,
+      url: 1,
+      summarized: 1,
+      sentiment: 1,
+      tags: 1
     }).toArray();
+
+    const lookup = results.reduce((l: ObjectLookup, pageDoc) => {
+      l[pageDoc._id] = pageDoc;
+      return l;
+    }, {});
+
+    return ids.map(id => {
+      return lookup[id];
+    }).filter(doc => !!doc);
   }
 
   const getPagesStream = () => {

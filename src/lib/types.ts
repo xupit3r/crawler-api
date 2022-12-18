@@ -47,3 +47,7 @@ export type Unqiues = {
 export type Counts = {
   [key: string]: number
 }
+
+export type ObjectLookup = {
+  [id: string]: Object
+}
