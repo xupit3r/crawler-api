@@ -16,11 +16,37 @@ const wss = new WebSocketServer({
 }, () => logger(`wss listening on port ${WSS_PORT}`));
 
 wss.on('connection', (ws) => {
-  ws.on('message', (data, isBinary) => {
-    if (!isBinary) {
-      logger(`received message ${data}`);
-    } else {
-      logger(`received a binary message`);
+  ws.on('message', async (data, isBinary) => {
+    if (isBinary) {
+      logger(`NOT_SUPPORTED: received binary message`);
+      return;
+    }
+
+    try {
+      const req = JSON.parse(data.toString());
+      const db = await useDb();
+
+      if (req.type === 'pages') {
+        logger('PAGE -- sending pages...');
+        db.getPagesStream().on('data', (doc) => {
+          ws.send(JSON.stringify({
+            type: 'page',
+            page: doc
+          }));
+        }).on('end', () => logger('PAGE -- done sending page data.'));;
+      } else if (req.type === 'tf') {
+        logger('TF -- sending tf info...');
+        db.getPageTFStream().on('data', (doc) => {
+          ws.send(JSON.stringify({
+            type: 'tf',
+            tf: doc
+          }));
+        }).on('end', () => logger('TF -- done sending TF data.'));
+      } else {
+        logger(`didn't recognize request type ${req.type}`);
+      }
+    } catch (err) {
+      logger('did not receive JSON data.')
     }
   });
 
@@ -28,48 +54,48 @@ wss.on('connection', (ws) => {
 });
 
 export const setupSockets = () => {
-  setInterval(async () => {
-    const db = await useDb();
+  // setInterval(async () => {
+  //   const db = await useDb();
 
-    const [
-      pages,
-      queue, 
-      cooldown, 
-      sites,
-      upNext,
-      cooldownHosts
-    ] = await Promise.all([
-      db.getPagesCount(),
-      db.getQueueCount(),
-      db.getCooldownCount(),
-      db.getSiteCounts(),
-      db.getUpNext(10),
-      db.getCooldown()
-    ]);
+  //   const [
+  //     pages,
+  //     queue, 
+  //     cooldown, 
+  //     sites,
+  //     upNext,
+  //     cooldownHosts
+  //   ] = await Promise.all([
+  //     db.getPagesCount(),
+  //     db.getQueueCount(),
+  //     db.getCooldownCount(),
+  //     db.getSiteCounts(),
+  //     db.getUpNext(10),
+  //     db.getCooldown()
+  //   ]);
   
-    const counts = [{
-      name: 'sites',
-      value: sites
-    }, {
-      name: 'pages',
-      value: pages
-    }, {
-      name: 'queue',
-      value: queue
-    }, {
-      name: 'cooldown',
-      value: cooldown
-    }];
+  //   const counts = [{
+  //     name: 'sites',
+  //     value: sites
+  //   }, {
+  //     name: 'pages',
+  //     value: pages
+  //   }, {
+  //     name: 'queue',
+  //     value: queue
+  //   }, {
+  //     name: 'cooldown',
+  //     value: cooldown
+  //   }];
 
 
 
-    wss.clients.forEach(client => {
-      client.send(JSON.stringify({
-        type: 'dashboard',
-        counts: counts,
-        upNext: upNext,
-        cooldown: cooldownHosts
-      }));
-    })
-  }, 500);
+  //   wss.clients.forEach(client => {
+  //     client.send(JSON.stringify({
+  //       type: 'dashboard',
+  //       counts: counts,
+  //       upNext: upNext,
+  //       cooldown: cooldownHosts
+  //     }));
+  //   })
+  // }, 500);
 }

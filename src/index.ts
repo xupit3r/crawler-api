@@ -51,6 +51,28 @@ router.get('/pages', async ctx => {
   ctx.body = await ctx.db.getPageListings(ctx.query.limit);
 });
 
+router.get('/search/pages', async ctx => {
+  try {
+    if (typeof ctx.query.ids === 'string') {
+      const ids = JSON.parse(ctx.query.ids);
+      ctx.body = await ctx.db.getPagesByIds(ids);
+    } else {
+      ctx.status = 400;
+      ctx.body = {
+        err: true,
+        message: 'bad request'
+      }
+    }
+  } catch (err) {
+    logger(err);
+    ctx.status = 400;
+    ctx.body = {
+      err: true,
+      message: 'bad request'
+    }
+  }
+})
+
 router.get('/pages/byid/:pageId', async ctx => {
   ctx.body = await ctx.db.getPage(ctx.params.pageId);
 });

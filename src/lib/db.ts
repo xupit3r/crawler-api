@@ -28,6 +28,7 @@ export const useDb = async () => {
   const queue = db.collection('queue');
   const cooldown = db.collection('cooldown');
   const text = db.collection('text');
+  const terms = db.collection('terms');
 
   const getPagesCount = async () => {
     return await pages.estimatedDocumentCount();
@@ -61,6 +62,23 @@ export const useDb = async () => {
     return cursor.toArray();
   }
 
+  const getPagesByIds = async (ids: Array<string>) => {
+    return await pages.find({
+      _id: {
+        $in: ids.map(id => new ObjectId(id))
+      }
+    }).toArray();
+  }
+
+  const getPagesStream = () => {
+    return pages.find().project({
+      _id: 1,
+      url: 1,
+      summarized: 1,
+      sentiment: 1
+    }).stream();
+  }
+
   const getPage = async (pageId: string) => {
     return await pages.findOne({
       _id: new ObjectId(pageId)
@@ -72,6 +90,10 @@ export const useDb = async () => {
       page: 1,
       text: 1
     }).toArray();
+  }
+
+  const getPageTFStream = () => {
+    return terms.find().stream();
   }
 
   const getPageText = async (pageId: string) => {
@@ -141,7 +163,10 @@ export const useDb = async () => {
     getQueueCount,
     getCooldownCount,
     getPageListings,
+    getPagesStream,
+    getPagesByIds,
     getPageTexts,
+    getPageTFStream,
     getPage,
     getPageText,
     getSiteListings,
