@@ -72,6 +72,7 @@ export const useDb = async () => {
       url: 1,
       summarized: 1,
       sentiment: 1,
+      summary: 1,
       tags: 1
     }).toArray();
 
@@ -89,6 +90,7 @@ export const useDb = async () => {
     return pages.find().project({
       _id: 1,
       url: 1,
+      summary: 1,
       summarized: 1,
       sentiment: 1
     }).stream();

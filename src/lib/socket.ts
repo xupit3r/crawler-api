@@ -66,48 +66,48 @@ wss.on('connection', (ws) => {
 });
 
 export const setupSockets = () => {
-  // setInterval(async () => {
-  //   const db = await useDb();
+  setInterval(async () => {
+    const db = await useDb();
 
-  //   const [
-  //     pages,
-  //     queue, 
-  //     cooldown, 
-  //     sites,
-  //     upNext,
-  //     cooldownHosts
-  //   ] = await Promise.all([
-  //     db.getPagesCount(),
-  //     db.getQueueCount(),
-  //     db.getCooldownCount(),
-  //     db.getSiteCounts(),
-  //     db.getUpNext(10),
-  //     db.getCooldown()
-  //   ]);
+    const [
+      pages,
+      queue, 
+      cooldown, 
+      sites,
+      upNext,
+      cooldownHosts
+    ] = await Promise.all([
+      db.getPagesCount(),
+      db.getQueueCount(),
+      db.getCooldownCount(),
+      db.getSiteCounts(),
+      db.getUpNext(10),
+      db.getCooldown()
+    ]);
   
-  //   const counts = [{
-  //     name: 'sites',
-  //     value: sites
-  //   }, {
-  //     name: 'pages',
-  //     value: pages
-  //   }, {
-  //     name: 'queue',
-  //     value: queue
-  //   }, {
-  //     name: 'cooldown',
-  //     value: cooldown
-  //   }];
+    const counts = [{
+      name: 'sites',
+      value: sites
+    }, {
+      name: 'pages',
+      value: pages
+    }, {
+      name: 'queue',
+      value: queue
+    }, {
+      name: 'cooldown',
+      value: cooldown
+    }];
 
 
 
-  //   wss.clients.forEach(client => {
-  //     client.send(JSON.stringify({
-  //       type: 'dashboard',
-  //       counts: counts,
-  //       upNext: upNext,
-  //       cooldown: cooldownHosts
-  //     }));
-  //   })
-  // }, 500);
+    wss.clients.forEach(client => {
+      client.send(JSON.stringify({
+        type: 'dashboard',
+        counts: counts,
+        upNext: upNext,
+        cooldown: cooldownHosts
+      }));
+    })
+  }, 500);
 }
