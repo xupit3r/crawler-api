@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 export type Link = {
   source: string
   sourceHost: string
@@ -12,6 +14,12 @@ export type Page = {
   type: 'html' | 'error' | 'other'
   data: string
   links: Array<Link>
+}
+
+export type TermMatch = {
+  page: ObjectId
+  term: string
+  score: number
 }
 
 export type Site = {

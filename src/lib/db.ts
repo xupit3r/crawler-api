@@ -3,6 +3,7 @@ import { MongoClient, ObjectId } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
 import { ObjectLookup, Site } from './types';
+import { prepareTerm, scoreMatches } from './search';
 
 const logger = debug('db');
 
@@ -29,6 +30,7 @@ export const useDb = async () => {
   const cooldown = db.collection('cooldown');
   const text = db.collection('text');
   const terms = db.collection('terms');
+  const tokens = db.collection('tokens');
 
   const getPagesCount = async () => {
     return await pages.estimatedDocumentCount();
@@ -62,7 +64,7 @@ export const useDb = async () => {
     return cursor.toArray();
   }
 
-  const getPagesByIds = async (ids: Array<string>) => {
+  const getPagesByIds = async (ids: Array<string> | Array<ObjectId>) => {
     const results = await pages.find({
       _id: {
         $in: ids.map(id => new ObjectId(id))
@@ -82,7 +84,7 @@ export const useDb = async () => {
     }, {});
 
     return ids.map(id => {
-      return lookup[id];
+      return lookup[id.toString()];
     }).filter(doc => !!doc);
   }
 
@@ -111,6 +113,36 @@ export const useDb = async () => {
 
   const getPageTFStream = () => {
     return terms.find().stream();
+  }
+
+  const getMatchedPages = async (term: string) => {
+    const terms = prepareTerm(term);
+
+    // pull the matches from the token collection
+    const matches = await tokens.find({
+      term: {
+        $in: terms
+      }
+    }).sort({
+      score: -1
+    }).toArray();
+
+    // get the total number of pages
+    const total = await pages.estimatedDocumentCount();
+
+    // find the pages (ids) that best match 
+    // the search term
+    const matchedPages = scoreMatches(
+      terms,
+      matches.map(match => ({
+        page: match.page,
+        term: match.term,
+        score: match.score
+      })),
+      total
+    );
+
+    return await getPagesByIds(matchedPages);
   }
 
   const getPageText = async (pageId: string) => {
@@ -184,6 +216,7 @@ export const useDb = async () => {
     getPagesByIds,
     getPageTexts,
     getPageTFStream,
+    getMatchedPages,
     getPage,
     getPageText,
     getSiteListings,

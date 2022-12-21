@@ -52,26 +52,17 @@ router.get('/pages', async ctx => {
 });
 
 router.get('/search/pages', async ctx => {
-  try {
-    if (typeof ctx.query.ids === 'string') {
-      const ids = JSON.parse(ctx.query.ids);
-      ctx.body = await ctx.db.getPagesByIds(ids);
-    } else {
-      ctx.status = 400;
-      ctx.body = {
-        err: true,
-        message: 'bad request'
-      }
-    }
-  } catch (err) {
-    logger(err);
+  if (typeof ctx.query.term === 'string') {
+    ctx.body = await ctx.db.getMatchedPages(ctx.query.term);
+  } else {
+    logger('expected a term string, got nothing...');
     ctx.status = 400;
     ctx.body = {
       err: true,
       message: 'bad request'
     }
   }
-})
+});
 
 router.get('/pages/byid/:pageId', async ctx => {
   ctx.body = await ctx.db.getPage(ctx.params.pageId);
@@ -84,6 +75,7 @@ router.get('/pages/texts', async ctx => {
 router.get('/pages/text/:pageId', async ctx => {
   ctx.body = await ctx.db.getPageText(ctx.params.pageId);
 });
+
 
 router.get('/sites', async ctx => {
   ctx.body = await ctx.db.getSiteListings();
