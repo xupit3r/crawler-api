@@ -55,7 +55,18 @@ router.get('/search/pages', async ctx => {
   if (typeof ctx.query.term === 'string') {
     ctx.body = await ctx.db.getMatchedPages(ctx.query.term);
   } else {
-    logger('expected a term string, got nothing...');
+    ctx.status = 400;
+    ctx.body = {
+      err: true,
+      message: 'bad request'
+    }
+  }
+});
+
+router.get('/search/pages/suggestions', async ctx => {
+  if (typeof ctx.query.term === 'string') {
+    ctx.body = await ctx.db.getSuggestions(ctx.query.term);
+  } else {
     ctx.status = 400;
     ctx.body = {
       err: true,

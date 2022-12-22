@@ -59,3 +59,7 @@ export type Counts = {
 export type ObjectLookup = {
   [id: string]: Object
 }
+
+export type Lookup = {
+  [key: string]: string
+}

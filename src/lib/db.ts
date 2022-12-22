@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { MongoClient, ObjectId } from "mongodb";
 import debug from 'debug';
 import { exit } from 'process';
-import { ObjectLookup, Site } from './types';
+import { Lookup, ObjectLookup, Site } from './types';
 import { prepareTerm, scoreMatches } from './search';
 
 const logger = debug('db');
@@ -145,6 +145,26 @@ export const useDb = async () => {
     return await getPagesByIds(matchedPages);
   }
 
+  const getSuggestions = async (term: string) => {
+    const suggestions = await tokens.find({
+      $text: { $search: term }
+    }).project({
+      score: { score: { $meta: 'textScore' } }
+    }).sort({ score: { $meta: 'textScore' } }).limit(50).toArray();
+
+    const phrases = suggestions.map(suggest => {
+      const uniques = suggest.term.split(/\s+/).reduce((h: Lookup, s: string) => {
+        return h[s] = s, h;
+      }, {} as Lookup);
+
+      return Object.values(uniques).join(' ');
+    }).reduce((h: Lookup, s: string) => {
+      return h[s] = s, h;
+    }, {} as Lookup);
+
+    return Object.values(phrases);
+  }
+
   const getPageText = async (pageId: string) => {
     const textDoc = await text.findOne({
       page: new ObjectId(pageId)
@@ -217,6 +237,7 @@ export const useDb = async () => {
     getPageTexts,
     getPageTFStream,
     getMatchedPages,
+    getSuggestions,
     getPage,
     getPageText,
     getSiteListings,
