@@ -26,6 +26,7 @@ export const useDb = async () => {
 
   // collections that may be used
   const pages = db.collection('pages');
+  const sites = db.collection('sites');
   const queue = db.collection('queue');
   const cooldown = db.collection('cooldown');
   const text = db.collection('text');
@@ -178,12 +179,9 @@ export const useDb = async () => {
   }
 
   const getSiteListings = async () => {
-    const hostDocs = await pages.distinct('host');
-    const sites: Array<Site> = hostDocs.filter(host => host.length).map(host => ({
-      name: host
-    }));
+    const docs = await sites.find().toArray();
 
-    return sites.sort((a, b) => {
+    return docs.sort((a, b) => {
       if (a.name < b.name) {
         return -1;
       } else if (a.name > b.name) {
@@ -192,6 +190,18 @@ export const useDb = async () => {
 
       return 0
     });
+  }
+
+  const getSite = async (siteId: string) => {
+    const siteDoc = await sites.findOne({
+      _id: new ObjectId(siteId)
+    });
+
+    if (siteDoc !== null) {
+      return siteDoc;
+    }
+
+    return {};
   }
 
   const getUpNext = async (num: number = 50) => {
@@ -241,6 +251,7 @@ export const useDb = async () => {
     getPage,
     getPageText,
     getSiteListings,
+    getSite,
     getUpNext,
     getCooldown
   }

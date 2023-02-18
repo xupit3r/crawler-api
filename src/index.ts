@@ -87,9 +87,12 @@ router.get('/pages/text/:pageId', async ctx => {
   ctx.body = await ctx.db.getPageText(ctx.params.pageId);
 });
 
-
 router.get('/sites', async ctx => {
   ctx.body = await ctx.db.getSiteListings();
+});
+
+router.get('/sites/byid/:siteId', async ctx => {
+  ctx.body = await ctx.db.getSite(ctx.params.siteId);
 });
 
 router.get('/cooldown', async ctx => {
