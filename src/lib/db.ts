@@ -197,11 +197,20 @@ export const useDb = async () => {
       _id: new ObjectId(siteId)
     });
 
-    if (siteDoc !== null) {
-      return siteDoc;
+    if (siteDoc === null) {
+      return {};
     }
 
-    return {};
+    const pageDocs = await pages.find({
+      host: siteDoc.name
+    }).toArray();
+
+    return {
+      ...siteDoc,
+      ...{
+        pages: pageDocs
+      }
+    };
   }
 
   const getUpNext = async (num: number = 50) => {
